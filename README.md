@@ -298,6 +298,43 @@ Key prompt principles:
 
 ---
 
+## AI Tools in Development
+
+### How I Used AI Coding Assistants
+
+This project was built on a foundation from my personal `rag-assets` repository, which I developed last year. The core components (vector DB wrapper, Groq service, file readers, and RAG pipeline) were written manually by me. AI assistance was used primarily for:
+
+1. **Docstrings**: AI generated initial docstrings, which I then reviewed and refined for accuracy before committing
+2. **Gradio UI**: Used Antigravity (agentic IDE) to help scaffold the Gradio interface, with detailed specifications provided upfront
+3. **README documentation**: For this README, I provided all my thoughts, technical decisions, and rationale to the AI. I explained what technologies I've worked with, why I made specific choices, and what I'd do differently. The AI then structured and articulated these ideas effectively—but the substance and opinions are entirely mine.
+
+### My AI-Assisted Development Workflow
+
+1. **Detailed upfront specifications**: Before asking the agent to write code, I provide all context—what I want to achieve, the tech stack, libraries, and constraints
+2. **Implementation plan review**: I ask the agent to create a detailed implementation plan first, which I review thoroughly before proceeding
+3. **Code review after generation**: Once the agent writes code, I go through all changes to verify they match my expectations and coding style
+4. **Manual testing**: I run the application and test all functionalities before committing
+5. **Incremental commits**: Only after verification do I commit the code
+
+### Do's and Don'ts with AI Coding Assistants
+
+**Do's**:
+- Provide comprehensive context and specifications upfront
+- Ask for implementation plans before code generation
+- Review every line of generated code before committing
+- Use AI for boilerplate, repetitive code, and documentation
+- Test AI-generated code thoroughly—don't assume it works
+- Maintain your own coding patterns and ask AI to follow them
+
+**Don'ts**:
+- Never commit AI-generated code without understanding it
+- Don't let AI make architectural decisions without your review
+- Avoid using AI for security-sensitive or business-critical logic without extra scrutiny
+- Don't rely on AI for domain-specific accuracy—validate against documentation
+- Never skip testing because "the AI wrote it correctly"
+
+---
+
 ## What I'd Do Differently With More Time
 
 ### Priority 1: Testing & Quality
