@@ -7,8 +7,10 @@ def init_chat_model(
     temperature=0,
     top_p=0.1,
     stop_sequences=[],
-    groq_apikey=os.getenv("GROQ_APIKEY"),
+    groq_apikey=None,
 ):
+    if not groq_apikey:
+        groq_apikey = os.getenv("GROQ_APIKEY")
     if not groq_apikey:
         raise ValueError(
             "GROQ_APIKEY is required for connecting to GROQ. "

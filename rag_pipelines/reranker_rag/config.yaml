@@ -1,6 +1,6 @@
 llm:
     model_id: "openai/gpt-oss-120b"
-    max_tokens: 500
+    max_tokens: 2000
     temperature: 0
     top_p: 0.1
     stop_sequences: []
