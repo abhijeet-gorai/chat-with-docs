@@ -1,6 +1,6 @@
 from services.vector_db.chroma import ChromaRetriever
 from services.groq import init_chat_model
-from utils.file_readers import read_pdf_file, read_docx_file
+from utils.file_readers import read_pdf_file, read_docx_file, read_txt_file
 from typing import List, Tuple, Iterator, Union, Optional
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.messages import SystemMessage, HumanMessage, BaseMessage, BaseMessageChunk
@@ -90,6 +90,8 @@ class RerankerRAG:
                 docs.extend(read_pdf_file(file, **self.file_reader.get("pdf")))
             elif file.lower().endswith('.docx'):
                 docs.extend(read_docx_file(file, **self.file_reader.get("docx")))
+            elif file.lower().endswith('.txt'):
+                docs.extend(read_txt_file(file))
             else:
                 raise ValueError(f"Unsupported file format: {file}")
         

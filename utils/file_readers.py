@@ -20,6 +20,15 @@ from docx.text.paragraph import Paragraph
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 
+def _ensure_metadata(docs: List[Document], filepath: str) -> List[Document]:
+    """Ensure all documents have consistent filename and file_path metadata."""
+    filename = os.path.basename(filepath)
+    for doc in docs:
+        doc.metadata.setdefault("file_path", filepath)
+        doc.metadata.setdefault("filename", filename)
+    return docs
+
+
 def read_pdf_file(
     filepath: str,
     pdfloader: Literal["PYMUPDF", "PYPDF", "unstructured-langchain", "TESSERACT"] = "PYMUPDF",
@@ -54,10 +63,10 @@ def read_pdf_file(
             )
             for page_no, image in tqdm(enumerate(images), desc="Processing PDF pages")
         ]
-        return items
+        return _ensure_metadata(items, filepath)
     else:
         raise ValueError("PDF Loader Not Supported")
-    return loader.load()
+    return _ensure_metadata(loader.load(), filepath)
 
 
 def extract_table_text(table: Table) -> str:
@@ -94,11 +103,11 @@ def read_docx_file(
     """
     if docxloader == "unstructured-langchain":
         loader = UnstructuredWordDocumentLoader(filepath, mode=mode)
-        return loader.load()
+        return _ensure_metadata(loader.load(), filepath)
     
     if docxloader == "docx2txt":
         loader = Docx2txtLoader(filepath)
-        return loader.load()
+        return _ensure_metadata(loader.load(), filepath)
     
     if docxloader == "python-docx":
         doc = DocxDocument(filepath)
@@ -132,3 +141,19 @@ def read_docx_file(
         return items
 
     raise ValueError("DOCX Loader Not Supported")
+
+
+def read_txt_file(filepath: str) -> List[Document]:
+    """Reads a plain text file and returns it as a single Document."""
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+    
+    return [
+        Document(
+            page_content=content,
+            metadata={
+                "file_path": filepath,
+                "filename": os.path.basename(filepath),
+            },
+        )
+    ]

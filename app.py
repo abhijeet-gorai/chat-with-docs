@@ -11,6 +11,7 @@ with open("rag_pipelines/reranker_rag/config.yaml", "r") as f:
 
 rag = RerankerRAG(config)
 
+# Supported Groq models for the LLM dropdown
 GROQ_MODELS = [
     "meta-llama/llama-4-scout-17b-16e-instruct",
     "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -20,11 +21,15 @@ GROQ_MODELS = [
     "openai/gpt-oss-20b",
 ]
 
+
 def get_collections():
+    """Fetch available collections from vector store."""
     collections = rag.vector_db.list_collections()
-    return collections if collections else ["default"]
+    return collections
+
 
 def get_llm_settings():
+    """Return current LLM config values."""
     return (
         rag.llm_config.get("model_id", GROQ_MODELS[0]),
         rag.llm_config.get("temperature", 0),
@@ -32,7 +37,13 @@ def get_llm_settings():
         rag.llm_config.get("top_p", 0.1)
     )
 
+
 def load_initial_state():
+    """
+    Initialize UI components on page load.
+    
+    Returns Gradio updates for LLM settings and collection dropdowns.
+    """
     model, temp, max_tok, top_p = get_llm_settings()
     collections = get_collections()
     collections_with_new = collections + ["Create New Collection"]
@@ -45,19 +56,27 @@ def load_initial_state():
         gr.update(choices=collections_with_new, value=collections[0] if collections else None)
     )
 
+
 def refresh_collection_dropdown():
+    """Refresh Q&A tab collection dropdown."""
     collections = get_collections()
     return gr.update(choices=collections, value=collections[0] if collections else None)
 
+
 def refresh_collection_dropdown_with_new():
+    """Refresh Add Documents tab dropdown, including 'Create New Collection' option."""
     collections = get_collections()
     choices = collections + ["Create New Collection"]
     return gr.update(choices=choices, value=collections[0] if collections else None)
 
+
 def toggle_new_collection_input(selected):
+    """Show/hide new collection name input based on dropdown selection."""
     return gr.update(visible=(selected == "Create New Collection"))
 
+
 def apply_llm_settings(model_id, temperature, max_tokens, top_p):
+    """Apply user-selected LLM parameters to the RAG pipeline."""
     rag.set_llm_params(
         model_id=model_id,
         temperature=temperature,
@@ -66,7 +85,13 @@ def apply_llm_settings(model_id, temperature, max_tokens, top_p):
     )
     return "LLM parameters updated"
 
+
 def ask_question(query, collection):
+    """
+    Stream answer for a user query against the selected collection.
+    
+    Yields partial answer text and source documents as markdown.
+    """
     if not query.strip():
         yield "Please enter a question.", ""
         return
@@ -78,13 +103,17 @@ def ask_question(query, collection):
     try:
         answer_stream, docs = rag.stream_answer(query, k=4, collection_name=collection)
         
+        # Format retrieved docs as markdown sources
         sources_md = ""
         if docs:
             sources_md = "### Sources\n\n"
             for i, doc in enumerate(docs, 1):
                 content_preview = doc.page_content
-                source_file = doc.metadata.get("file_path", doc.metadata.get("source", "Unknown"))
-                sources_md += f"**[{i}]** `{os.path.basename(source_file)}`\n\n{content_preview}\n\n---\n\n"
+                filename = doc.metadata.get("filename")
+                if not filename:
+                    source_file = doc.metadata.get("file_path", doc.metadata.get("source", "Unknown"))
+                    filename = os.path.basename(source_file)
+                sources_md += f"**[{i}]** `{filename}`\n\n{content_preview}\n\n---\n\n"
         
         full_answer = ""
         for chunk in answer_stream:
@@ -94,10 +123,17 @@ def ask_question(query, collection):
     except Exception as e:
         yield f"Error: {str(e)}", ""
 
+
 def upload_documents(files, collection, new_collection_name):
+    """
+    Ingest uploaded documents into the specified collection.
+    
+    Handles both existing collections and new collection creation.
+    """
     if not files:
         return "No files selected", gr.update()
     
+    # Determine target: new collection name if creating, else selected collection
     target_collection = new_collection_name.strip() if collection == "Create New Collection" else collection
     
     if not target_collection:
@@ -112,6 +148,7 @@ def upload_documents(files, collection, new_collection_name):
     except Exception as e:
         return f"Error: {str(e)}", gr.update()
 
+# Gradio UI
 with gr.Blocks(title="Chat with Docs") as app:
     gr.Markdown("# Chat with Docs")
     
