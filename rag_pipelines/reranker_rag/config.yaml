@@ -1,0 +1,23 @@
+llm:
+    model_id: "openai/gpt-oss-120b"
+    max_tokens: 500
+    temperature: 0
+    top_p: 0.1
+    stop_sequences: []
+vector_db:
+    embedding_modelname: "sentence-transformers/all-MiniLM-L6-v2"
+    collection_name: "chroma_collection_reranker"
+    persist_directory: "./chroma_db"
+chunking:
+    chunk_size: 512
+    chunk_overlap: 50
+    separators: ["\n\n", " "]
+file_reader:
+    pdf:
+        pdfloader: "PYMUPDF"
+    docx:
+        docxloader: "python-docx"
+reranker:
+    type: "crossencoder"
+    params:
+        model_name: cross-encoder/ms-marco-MiniLM-L-6-v2
