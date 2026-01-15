@@ -86,7 +86,7 @@ def apply_llm_settings(model_id, temperature, max_tokens, top_p):
     return "LLM parameters updated"
 
 
-def ask_question(query, collection):
+def ask_question(query, collection, k):
     """
     Stream answer for a user query against the selected collection.
     
@@ -101,7 +101,7 @@ def ask_question(query, collection):
         return
     
     try:
-        answer_stream, docs = rag.stream_answer(query, k=4, collection_name=collection)
+        answer_stream, docs = rag.stream_answer(query, k=int(k), collection_name=collection)
         
         # Format retrieved docs as markdown sources
         sources_md = ""
@@ -193,7 +193,13 @@ with gr.Blocks(title="Chat with Docs") as app:
                 placeholder="Ask something about your documents...",
                 lines=2
             )
-            submit_btn = gr.Button("Ask", variant="primary")
+            
+            with gr.Row():
+                k_slider = gr.Slider(
+                    minimum=1, maximum=10, value=4, step=1,
+                    label="Number of chunks to retrieve"
+                )
+                submit_btn = gr.Button("Ask", variant="primary")
             
             answer_output = gr.Markdown(label="Answer")
             
@@ -203,12 +209,12 @@ with gr.Blocks(title="Chat with Docs") as app:
             refresh_qa_btn.click(fn=refresh_collection_dropdown, outputs=qa_collection)
             submit_btn.click(
                 fn=ask_question,
-                inputs=[query_input, qa_collection],
+                inputs=[query_input, qa_collection, k_slider],
                 outputs=[answer_output, sources_output]
             )
             query_input.submit(
                 fn=ask_question,
-                inputs=[query_input, qa_collection],
+                inputs=[query_input, qa_collection, k_slider],
                 outputs=[answer_output, sources_output]
             )
         
