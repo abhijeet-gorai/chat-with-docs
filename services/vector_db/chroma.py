@@ -22,7 +22,7 @@ class ChromaRetriever:
         self,
         embedding_modelname: str = "intfloat/multilingual-e5-small",
         collection_name: str = "chroma_collection",
-        persist_directory: Optional[str] = os.getenv("CHROMA_PERSIST_DIRECTORY", "./chroma_db"),
+        persist_directory: Optional[str] = "./chroma_db",
     ) -> None:
         model_kwargs = {"device": "cpu", "trust_remote_code": True}
         self.collection_name = collection_name
